@@ -59,3 +59,4 @@ class Register(dict):
 
     def items(self):
         return self._dict.items()
+    
