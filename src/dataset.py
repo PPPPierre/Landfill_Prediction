@@ -13,19 +13,40 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 
+from augmentation import get_transforms_from_config
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def get_dataloader_from_cfg(cfg: dict):
+
+    # Load arguments
+    geojson_path = cfg["geojson_path"]
+    transform = get_transforms_from_config(cfg["transforms"])
+    datetime = cfg["datatime"]
+    download_dir = cfg.get("download_dir", None)
+    batch_size = cfg.get("batch_size", 4)
+    shuffle = cfg.get("shuffle", True)
+
+    # Loading dataset and dataloader
+    dataset = SatelliteDataset(geojson_path, datatime=datetime, download_dir=download_dir, transform=transform)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+
+    return dataset, loader
+
+
 class SatelliteDataset(Dataset):
-    def __init__(self, geojson_path: str, datetime: str, transform=None, download_dir: Optional[str]=None) -> None:
+    def __init__(self, geojson_path: str, datetime: str, download_dir: Optional[str]=None, transform=None) -> None:
         self.data = gpd.read_file(geojson_path)
+        self.filename = os.path.basename(geojson_path).replace(".geojson", "")
         self.datetime = datetime
-        self.transform = transform
+        self.transforms = get_transforms_from_config(transform)
         self.catalog = Client.open(
             "https://planetarycomputer.microsoft.com/api/stac/v1",
             modifier=planetary_computer.sign_inplace,
         )
 
         if download_dir is None:
-            filename = os.path.basename(geojson_path).replace(".geojson", "")
-            self.download_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), f"data/temp/{filename}")
+            self.download_dir = os.path.join(root, f"data/temp/{self.filename}")
         else:
             self.download_dir = download_dir
         
@@ -83,9 +104,9 @@ def collate_fn(batch):
     labels = [item['label'] for item in batch]
     return {'images': torch.stack(images), 'labels': torch.tensor(labels)}
 
+
 if __name__ == '__main__':
 
-    from augmentation import get_transforms_from_config
     import matplotlib.pyplot as plt
 
     transforms_list = [
@@ -95,7 +116,7 @@ if __name__ == '__main__':
         },
         {
             "name": "resize", 
-            "params": {"size": (256, 256)}
+            "params": {"size": (224, 224)}
         },
         {
             "name": "random_flip", 

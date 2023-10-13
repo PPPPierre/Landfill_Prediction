@@ -11,7 +11,6 @@ FOMATTER = logging.Formatter(
     "%Y-%m-%d %H:%M:%S"
 )
 
-
 def init_logger(logger_name, log_dir, log_file_name: Optional[str]=None):
     if log_file_name is None:
         log_file_name = time.strftime(str(log_dir / "%Y-%m-%d_%H-%M-%S")) + ".log"

@@ -1,5 +1,5 @@
 from typing import Any
-from outils.register import Register
+from utils.register import Register
 import torchvision.transforms as transforms
 
 """
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     transforms_list = [
         {
             "name": "resize", 
-            "params": {"size": (256, 256)}
+            "params": {"size": (224, 224)}
         },
         {
             "name": "random_flip", 
