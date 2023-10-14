@@ -26,7 +26,7 @@ class ResNet18(nn.Module):
     def __init__(self) -> None:
         super(ResNet18, self).__init__()
         # Load pretrained resnet18
-        base_model = models.resnet18(pretrained=True)
+        base_model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
         
         # remove last layer
         backbone = list(base_model.children())[:-1]

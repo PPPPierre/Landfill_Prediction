@@ -35,7 +35,7 @@ def create_transform_from_config(config):
         raise ValueError(f"Transform {config['name']} not recognized")
     return transform_class(**config.get("params", {}))
 
-def get_transforms_from_config(transforms_config: dict):
+def get_transforms_from_config(transforms_config: list):
     transforms_list = [create_transform_from_config(tc) for tc in transforms_config]
     return transforms.Compose(transforms_list)
 

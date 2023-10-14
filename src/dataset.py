@@ -22,14 +22,14 @@ def get_dataloader_from_cfg(cfg: dict):
     # Load arguments
     geojson_path = cfg["geojson_path"]
     transform = get_transforms_from_config(cfg["transforms"])
-    datetime = cfg["datatime"]
-    download_dir = cfg.get("download_dir", None)
+    datetime = cfg["datetime"]
     batch_size = cfg.get("batch_size", 4)
     shuffle = cfg.get("shuffle", True)
+    download_dir = cfg.get("download_dir", None)
 
     # Loading dataset and dataloader
-    dataset = SatelliteDataset(geojson_path, datatime=datetime, download_dir=download_dir, transform=transform)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+    dataset = SatelliteDataset(geojson_path, datetime=datetime, download_dir=download_dir, transform=transform)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
 
     return dataset, loader
 
@@ -39,7 +39,7 @@ class SatelliteDataset(Dataset):
         self.data = gpd.read_file(geojson_path)
         self.filename = os.path.basename(geojson_path).replace(".geojson", "")
         self.datetime = datetime
-        self.transforms = get_transforms_from_config(transform)
+        self.transform = transform
         self.catalog = Client.open(
             "https://planetarycomputer.microsoft.com/api/stac/v1",
             modifier=planetary_computer.sign_inplace,
@@ -100,9 +100,9 @@ class SatelliteDataset(Dataset):
         return sample
 
 def collate_fn(batch):
-    images = [item['image'] for item in batch]
-    labels = [item['label'] for item in batch]
-    return {'images': torch.stack(images), 'labels': torch.tensor(labels)}
+    images = [item[0] for item in batch]
+    labels = [item[1] for item in batch]
+    return [torch.stack(images), torch.tensor(labels)]
 
 
 if __name__ == '__main__':
