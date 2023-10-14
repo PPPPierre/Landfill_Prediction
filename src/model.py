@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
-from utils.register import Register
+from .utils.register import Register
 
 model_register = Register()
 
@@ -15,6 +15,8 @@ def get_model_from_cfg(cfg: dict) -> torch.nn.Module:
     
     # Check if there are additional arguments provided in the config for model initialization
     model_args = cfg.get('params', {})
+    if model_args is None:
+        model_args = {}
 
     # Instantiate the model with provided arguments
     model_instance = model_cls(**model_args)
@@ -23,7 +25,7 @@ def get_model_from_cfg(cfg: dict) -> torch.nn.Module:
 
 @model_register("ResNet18")
 class ResNet18(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, freeze_backbone: bool=True) -> None:
         super(ResNet18, self).__init__()
         # Load pretrained resnet18
         base_model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
@@ -31,6 +33,11 @@ class ResNet18(nn.Module):
         # remove last layer
         backbone = list(base_model.children())[:-1]
         self.backbone = nn.Sequential(*backbone)
+
+        # Freeze the layers of backbone
+        if freeze_backbone:
+            for param in self.backbone.parameters():
+                param.requires_grad = False
         
         # add a binary classification layer
         self.classifier = nn.Linear(in_features=512, out_features=1)
