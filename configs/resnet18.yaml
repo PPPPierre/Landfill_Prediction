@@ -1,0 +1,57 @@
+verision: 1.0.0
+
+model:
+  name: ResNet18
+  params: 
+    freeze_backbone: True
+
+train:
+  data:
+    geojson_path: ./data/raw/train.geojson
+    datetime: 2022-01-01/2022-12-30
+    transforms:
+      - name: to_tensor
+        params: {}
+      - name: resize
+        params:
+          size: [224, 224]
+      - name: random_flip
+        params: 
+          probability_vertical: 0.5 
+          probability_horizontal: 0.5
+      - name: normalize
+        params:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+    batch_size: 2
+    shuffle: True
+  # result_dir:
+  # resume_ckpt:
+  epochs: 30
+  optimizer:
+    type: SGD
+    args:
+      lr: 0.01
+      weight_decay: 0.0
+  scheduler:
+    type: step
+    args:
+      lr_schedule: {10: 0.1, 20: 0.1}
+      warm_up: 4
+
+test:
+  data:
+    geojson_path: ./data/raw/test.geojson
+    datetime: 2022-01-01/2022-12-30
+    transforms:
+      - name: to_tensor
+        params: {}
+      - name: resize
+        params:
+          size: [224, 224]
+      - name: normalize
+        params:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+    batch_size: 1
+    shuffle: false
