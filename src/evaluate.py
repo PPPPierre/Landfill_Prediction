@@ -3,10 +3,11 @@ import torch
 import logging
 
 from torch.utils.data import DataLoader
-from metrics import compute_metrics
-from model import  get_model_from_cfg
-from loss import BCEWithLogitsLoss
-from dataset import get_dataloader_from_cfg, SatelliteDataset
+
+from .metrics import compute_metrics
+from .model import  get_model_from_cfg
+from .loss import BCEWithLogitsLoss
+from .dataset import get_dataloader_from_cfg, SatelliteDataset
 
 def evaluate(
         cfg: dict, 
@@ -22,8 +23,6 @@ def evaluate(
     all_preds = []
     all_labels = []
     total_loss = 0.0
-
-    logger.info("Start the evaluation.")
 
     running_loss = 0.0
 
@@ -44,10 +43,6 @@ def evaluate(
             
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-
-            if i % 10 == 9:
-                logger.info(f"[Mini-batch {i + 1}] loss: {running_loss / 10:.3f}")
-                running_loss = 0.0
             
     metrics = compute_metrics(all_labels, all_preds)
     metrics['evaluate_loss'] = total_loss / len(test_loader.dataset)

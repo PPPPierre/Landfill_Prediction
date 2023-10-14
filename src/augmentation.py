@@ -1,5 +1,5 @@
 from typing import Any
-from utils.register import Register
+from .utils.register import Register
 import torchvision.transforms as transforms
 
 """

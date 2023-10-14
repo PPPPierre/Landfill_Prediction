@@ -1,5 +1,5 @@
-from optimizor import get_optimizor_from_cfg
-from scheduler import scheduler_register
+from .optimizor import get_optimizor_from_cfg
+from .scheduler import scheduler_register
 
 def create_optimizer_with_scheduler_from_cfg(params, cfg: dict):
     optimizer_cfg = cfg['optimizer']
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 "lr_schedule": {
                     5: 0.5,
                     10: 0.1,
-                    15: 0.01
+                    15: 0.1
                 },
                 "warm_up": 4
             }

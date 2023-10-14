@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 
-from augmentation import get_transforms_from_config
+from .augmentation import get_transforms_from_config
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

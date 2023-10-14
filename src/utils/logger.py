@@ -3,6 +3,7 @@ import logging.handlers
 import time
 import os
 import sys
+from pathlib import Path
 from typing import Optional
 
 
@@ -12,6 +13,9 @@ FOMATTER = logging.Formatter(
 )
 
 def init_logger(logger_name, log_dir, log_file_name: Optional[str]=None) -> logging.Logger:
+    if not isinstance(log_dir, Path):
+        log_dir = Path(log_dir)
+    
     if log_file_name is None:
         log_file_name = time.strftime(str(log_dir / "%Y-%m-%d_%H-%M-%S")) + ".log"
     else:
