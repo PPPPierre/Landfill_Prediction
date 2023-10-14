@@ -1,9 +1,25 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
-from outils.register import Register
+from utils.register import Register
 
 model_register = Register()
+
+def get_model_from_cfg(cfg: dict) -> torch.nn.Module:
+    model_name = cfg['name']
+    # Retrieve the model class from the registry
+    model_cls = model_register[model_name]
+    
+    if model_cls is None:
+        raise ValueError(f"Model {model_name} is not registered.")
+    
+    # Check if there are additional arguments provided in the config for model initialization
+    model_args = cfg.get('params', {})
+
+    # Instantiate the model with provided arguments
+    model_instance = model_cls(**model_args)
+    
+    return model_instance
 
 @model_register("ResNet18")
 class ResNet18(nn.Module):
@@ -28,9 +44,15 @@ class ResNet18(nn.Module):
 
 if __name__ == '__main__':
     from loss import BCEWithLogitsLoss
+    from metrics import compute_metrics
 
+    cfg = {
+        "name": "ResNet18",
+        "params": {}
+    }
+
+    model = get_model_from_cfg(cfg)
     BCEloss = BCEWithLogitsLoss()
-    model = ResNet18()
 
     inputs = torch.randn(2, 3, 224, 224)
     labels = torch.randint(0, 2, (2, 1), dtype=torch.float32)
@@ -38,10 +60,3 @@ if __name__ == '__main__':
     loss = BCEloss(outputs, labels)
 
     print(loss)
-
-
-
-
-
-
-        
