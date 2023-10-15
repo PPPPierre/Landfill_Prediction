@@ -16,15 +16,11 @@ def evaluate(
         criterion: torch.nn.Module, 
         device: torch.device):
     
-    logger = logging.getLogger("__main__")
-    
     model.eval()  # Set the model to evaluation mode
     
     all_preds = []
     all_labels = []
     total_loss = 0.0
-
-    running_loss = 0.0
 
     with torch.no_grad():
         for i, (inputs, labels) in enumerate(test_loader):
@@ -35,16 +31,14 @@ def evaluate(
             loss = criterion(outputs, labels)
             
             total_loss += loss.item()
-            running_loss += loss.item()
             
             # convert outputs to probabilities and classify
             probs = torch.sigmoid(outputs)
-            preds = torch.round(probs)
             
-            all_preds.extend(preds.cpu().numpy())
+            all_preds.extend(probs.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
             
-    metrics = compute_metrics(all_labels, all_preds)
+    metrics = compute_metrics(all_preds, all_labels)
     metrics['evaluate_loss'] = total_loss / len(test_loader.dataset)
     return metrics
 
