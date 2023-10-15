@@ -7,8 +7,6 @@ import warnings
 warnings.filterwarnings("ignore") 
 
 import torch
-import mlflow
-import mlflow.pytorch
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
@@ -25,11 +23,17 @@ def parse_args():
     return parser.parse_args()
 
 def main(config: dict):
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    time_stamp = datetime.datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%SZ")
-    result_dir = os.path.join(root_path, 'results', time_stamp)
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
+
+    # Set save dir
+    result_dir = config.get("result_dir", None)
+    if result_dir is None:
+        root_path = os.path.dirname(os.path.abspath(__file__))
+        time_stamp = datetime.datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%SZ")
+        job_name = config.get("job_name", "train")
+        version = config.get("version", "1.0.0")
+        result_dir = os.path.join(root_path, 'results', f"{job_name}_{version}_{time_stamp}")
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
 
     logger = init_logger("__main__", result_dir, 'train')
 
@@ -57,7 +61,7 @@ def main(config: dict):
     model = get_model_from_cfg(model_cfg)
     model = model.to(device)
 
-    train(config, time_stamp, train_loader, test_loader, model, device)
+    train(config, train_loader, test_loader, model, device, result_dir)
 
 if __name__ == '__main__':
     args = parse_args()
