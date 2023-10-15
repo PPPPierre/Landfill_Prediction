@@ -19,11 +19,11 @@ checkpoint_path = "checkpoint.pth"
 
 def train(
         config: dict, 
-        time_stamp: str,
         train_loader: DataLoader, 
         test_loader: DataLoader, 
         model: torch.nn.Module, 
-        device: torch.device, 
+        device: torch.device,
+        save_dir: str,
         ):
 
     train_cfg = config['train']
@@ -37,14 +37,6 @@ def train(
 
     # Defining optimizer and scheduler
     optimizer, scheduler = create_optimizer_with_scheduler_from_cfg(model.parameters(), train_cfg)
-
-    # Set save dir
-    root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    save_dir = train_cfg.get("result_dir", None)
-    if save_dir:
-        save_dir = os.path.join(root_path, save_dir)
-    else:
-        save_dir = os.path.join(root_path, f"results/{time_stamp}")
 
     # Resume training
     resume_ckpt = train_cfg.get("resume_ckpt", "")
