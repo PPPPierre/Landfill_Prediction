@@ -19,8 +19,8 @@ def compute_metrics(preds: np.ndarray, gts: np.ndarray) -> Dict[str, float]:
     f1 = f1_score(gts, binary_preds)
     
     return {
-        'accuracy': accuracy,
         'AUC': auc,
+        'accuracy': accuracy,
         'precision': precision,
         'recall': recall,
         'f1_score': f1,

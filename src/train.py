@@ -82,7 +82,7 @@ def train(
         
         # Evaluate
         metrics = evaluate(test_cfg, model, test_loader, criterion, device)
-        logger.info(f"[Epoch {epoch + 1}] learning rate: {scheduler.current_lr:.6f}, train loss: {average_loss:.6f}, AUC: {metrics['AUC']:.3f}, accuracy: {metrics['accuracy']:.3f}, precision: {metrics['precision']:.3f}, recall: {metrics['recall']:.3f}, f1_score: {metrics['f1_score']:.3f}")
+        logger.info(f"[Epoch {epoch + 1}] train loss: {average_loss:.6f}, AUC: {metrics['AUC']:.3f} with optimal threashold: {metrics['optimal_threshold']:.3f}, accuracy: {metrics['accuracy']:.3f}, precision: {metrics['precision']:.3f}, recall: {metrics['recall']:.3f}, f1_score: {metrics['f1_score']:.3f}")
         
         # Save model
         save_path = os.path.join(save_dir, f'epoch_{epoch + 1}.pth')
