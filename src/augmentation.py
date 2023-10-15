@@ -48,8 +48,11 @@ class Resize:
         self.T = transforms.Resize(size)
 
     def __call__(self, sample):
-        img, label = sample
-        return (self.T(img), label)
+        if (isinstance(sample, tuple) or isinstance(sample, list)) and len(sample) == 2:
+            img, label = sample
+            return (self.T(img), label)
+        else:
+            return self.T(sample)
 
 @transforms_registry("random_flip")
 class RandomFlip:
@@ -58,18 +61,22 @@ class RandomFlip:
         self.T2 = transforms.RandomHorizontalFlip(probability_horizontal)
 
     def __call__(self, sample):
-        img, label = sample
-        img = self.T2(self.T1(img))
-        return (img, label)
-
+        if (isinstance(sample, tuple) or isinstance(sample, list)) and len(sample) == 2:
+            img, label = sample
+            return (self.T2(self.T1(img)), label)
+        else:
+            return self.T2(self.T1(sample))
 @transforms_registry("normalize")
 class Normalize:
     def __init__(self, mean, std):
         self.T = transforms.Normalize(mean=mean, std=std)
 
     def __call__(self, sample):
-        img, label = sample
-        return (self.T(img), label)
+        if (isinstance(sample, tuple) or isinstance(sample, list)) and len(sample) == 2:
+            img, label = sample
+            return (self.T(img), label)
+        else:
+            return self.T(sample)
 
 @transforms_registry("to_tensor")
 class ToTensor:
@@ -77,8 +84,11 @@ class ToTensor:
         self.T = transforms.ToTensor()
 
     def __call__(self, sample):
-        img, label = sample
-        return (self.T(img), label)
+        if (isinstance(sample, tuple) or isinstance(sample, list)) and len(sample) == 2:
+            img, label = sample
+            return (self.T(img), label)
+        else:
+            return self.T(sample)
 
 if __name__ == '__main__':
 
