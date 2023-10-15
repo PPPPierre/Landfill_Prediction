@@ -6,8 +6,8 @@ model:
   name: ResNet18
   params: 
     freeze_backbone: True
-  threshold: 0.5
-  weight: results\resnet18_train_1.0.0_2023-10-15_14-31-40Z\epoch_30.pth
+  threshold: 0.623
+  weight: results\resnet18_train_1.0.0_2023-10-15_20-28-51Z\epoch_30.pth
 
 data:
   geojson_path: ./data/raw/pred.geojson
