@@ -63,11 +63,33 @@ As the problem is a binary classification, the choice of the threshold will dire
 
 > What do you think about the performance that you got with your model? Any reason?
 
+Result on test dataset:
+
+```
+AUC: 0.778, accuracy: 0.833, precision: 1.000, recall: 0.667, f1_score: 0.800
+```
+
+Given the metrics, the model showcases a good AUC of 77.8%, an accuracy rate of 83.3%, a precision of 100%, a recall of 66.7%, and a f1_score of 80%. However, despite these good results, the limited amount of data raises my concerns regarding the reliability of these metrics and the risk of overfitting. It's essential to note that such performance while appearing robust, may not guarantee the model's generalization to unseen data. Gathering more data can help ensure a more dependable performance and reduce the potential for overfitting.
+
 > Any suggestions to improve the performance?
+
+To improve performance, here I suggest considering the following:
+
+- Acquiring More Data: Gathering more data can significantly improve model performance.
+- Data Augmentation: In addition to traditional image data augmentation methods, more targeted data augmentation approaches can be designed based on the characteristics of this dataset: By using the training data's labels, one can randomly select satellite images that contains the training data range and then augment them through random cropping and resizing.
 
 > What could impact the performance of a machine learning model?
 
+- Quality of Data: Noise or inaccuracies in data can lead to poor model performance.
+- Quantity of Data: Insufficient data can prevent the model from generalizing well.
+- Model Complexity: Overly complex models might overfit to the training data, while overly simple models might underfit.
+- Hyperparameters: Incorrectly tuned hyperparameters can degrade performance.
+- Feature Engineering: The way data is represented and organized can significantly influence results.
+- Training Epochs: Inadequate training time can lead to underfitting.
+
 ## ML Pipeline
+
+
 
 ## Usage
 

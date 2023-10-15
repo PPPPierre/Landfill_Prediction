@@ -17,6 +17,7 @@ from src.dataset import get_dataloader_from_cfg
 from src.model import get_model_from_cfg
 from src.utils.logger import init_logger
 from src.train import train
+from src.utils.seed import setup_seed
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Training script for Landfill Detection")
@@ -36,6 +37,11 @@ def main(config: dict):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     logger.info(f"Device: {device}")
     logger.info(f"Config: {config}")
+    
+    # Setup random seed
+    seed = config.get('seed', 0)
+    setup_seed(seed)
+    logger.info(f"Random seed: {seed}")
 
     # Loading cfgs
     train_cfg = config["train"]

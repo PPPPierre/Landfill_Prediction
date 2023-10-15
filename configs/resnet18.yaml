@@ -1,4 +1,5 @@
 verision: 1.0.0
+seed: 18
 
 model:
   name: ResNet18
