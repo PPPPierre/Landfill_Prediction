@@ -86,7 +86,7 @@ class SatelliteDataset(Dataset):
         data_path = os.path.join(self.download_dir, f"data_{data_id}.pt")
         
         if not os.path.exists(data_path):
-            band_data = download_data(area_of_interest, self.catalog, self.collections, self.datetime)
+            band_data = download_aoi_data(area_of_interest, self.catalog, self.collections, self.datetime)
             img = Image.fromarray(np.transpose(band_data, axes=[1, 2, 0]))
             
             # Save to the download directory
@@ -107,7 +107,7 @@ def collate_fn(batch):
     labels = [item[1] for item in batch]
     return [torch.stack(images), torch.tensor(labels)]
 
-def download_data(
+def download_aoi_data(
         area_of_interest,
         catalog: Optional[Client]=None, 
         collections: str="sentinel-2-l2a", 
@@ -137,6 +137,23 @@ def download_data(
         band_data = ds.read(window=aoi_window)
 
     return band_data
+
+def down_load_entire_data_set_from_cfg(cfg: dict):
+    # Load arguments
+    geojson_path = cfg["geojson_path"]
+    transform = get_transforms_from_config(cfg["transform"])
+    collections = cfg["collections"]
+    datetime = cfg["datetime"]
+    band = cfg["band"]
+    batch_size = cfg.get("batch_size", 4)
+    shuffle = cfg.get("shuffle", True)
+    download_dir = cfg.get("download_dir", None)
+
+    # Loading dataset and dataloader
+    dataset = SatelliteDataset(geojson_path, collections=collections, datetime=datetime, band=band, download_dir=download_dir, transform=transform)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
+
+    return dataset, loader
 
 
 if __name__ == '__main__':

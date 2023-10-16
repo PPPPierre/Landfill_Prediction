@@ -31,7 +31,7 @@ def main(config: dict):
             os.makedirs(result_dir)
 
     # Initialize log
-    logger = init_logger("__main__", result_dir, 'train')
+    logger = init_logger("__main__", result_dir, 'pred')
     
     # Setup random seed
     seed = config.get('seed', 0)
@@ -39,7 +39,9 @@ def main(config: dict):
     logger.info(f"Random seed: {seed}")
 
     # predict
-    predict(cfg=config, save_dir=result_dir)
+    result_file = predict(cfg=config, save_dir=result_dir)
+
+    return result_file
 
 if __name__ == '__main__':
     args = parse_args()
