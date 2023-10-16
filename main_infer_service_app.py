@@ -1,4 +1,3 @@
-from flask import Flask, request, jsonify
 import queue
 import threading
 import yaml
@@ -6,8 +5,8 @@ import os
 import uuid
 import psutil
 import datetime
-import traceback
-from collections import defaultdict
+
+from flask import Flask, request, jsonify, send_file
 
 from main_pred import main as predic_job
 from src.utils.logger import init_logger
@@ -55,17 +54,38 @@ def infer():
 def get_result(task_id):
     logger.info(f"Received request for getting results for task {task_id}")
     if task_id not in results:
-        return jsonify({"status": "Job not found"}), 404
+        return jsonify({"status": "Task not found"}), 404
     elif results[task_id]["status"] == 1:
-        return jsonify({"status": "Job not completed yet"}), 202
+        return jsonify({"status": "Task not completed yet"}), 202
     elif results[task_id]["status"] == -1:
-        return jsonify({"status": "Inference job failed"}), 500
+        return jsonify({"status": "Inference task failed"}), 500
     else:
         result_file_path = results[task_id]["result_path"]
         with open(result_file_path, 'r') as f:
             content = f.read()
             logger.info(f"Return data for task {task_id}: {content}")
             return jsonify({"status": "completed", "data": content})
+
+@app.route('/logs/<task_id>', methods=['GET'])
+def show_logs(task_id):
+    logger.info(f"Received request for getting log for task {task_id}")
+    if task_id not in results:
+        return jsonify({"status": "Task not found"}), 404
+    elif results[task_id]["status"] == 1:
+        return jsonify({"status": "Task not completed yet"}), 202
+    elif results[task_id]["status"] == -1:
+        return jsonify({"status": "Inference task failed"}), 500
+    else:
+        result_file_path = results[task_id]["result_path"]
+        result_dir = os.path.dirname(result_file_path)
+        log_file_path = os.path.join(result_dir, "pred.log")
+        if os.path.exists(log_file_path):
+            try:
+                return send_file(log_file_path, as_attachment=True)
+            except Exception as e:
+                return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+        else:
+            return jsonify({'error': 'Log file not found.'}), 404
 
 @app.errorhandler(Exception)
 def handle_exception(e):

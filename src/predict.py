@@ -105,7 +105,7 @@ def predict(cfg: dict, save_dir: str):
         else:
             model.load_state_dict(checkpoint)
 
-    logger.info(f"Model successfully loaded")
+    logger.info("Model successfully loaded")
     logger.info(f"{model}")
 
     # Load data

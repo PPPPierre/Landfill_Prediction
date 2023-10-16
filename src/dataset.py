@@ -15,7 +15,6 @@ from rasterio import windows, features, warp
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
-from PIL import Image
 
 # Porject lib
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -87,7 +86,7 @@ class SatelliteDataset(Dataset):
         
         if not os.path.exists(data_path):
             band_data = download_aoi_data(area_of_interest, self.catalog, self.collections, self.datetime)
-            img = Image.fromarray(np.transpose(band_data, axes=[1, 2, 0]))
+            img = np.transpose(band_data, axes=[1, 2, 0])
             
             # Save to the download directory
             torch.save(img, data_path)
@@ -138,22 +137,19 @@ def download_aoi_data(
 
     return band_data
 
-def down_load_entire_data_set_from_cfg(cfg: dict):
+def download_entire_data_set_from_cfg(cfg: dict):
     # Load arguments
     geojson_path = cfg["geojson_path"]
     transform = get_transforms_from_config(cfg["transform"])
     collections = cfg["collections"]
     datetime = cfg["datetime"]
     band = cfg["band"]
-    batch_size = cfg.get("batch_size", 4)
-    shuffle = cfg.get("shuffle", True)
     download_dir = cfg.get("download_dir", None)
 
     # Loading dataset and dataloader
     dataset = SatelliteDataset(geojson_path, collections=collections, datetime=datetime, band=band, download_dir=download_dir, transform=transform)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
-
-    return dataset, loader
+    for i, (img, label) in enumerate(dataset):
+        print(f"[Data {i}]: size: {img.shape}, label: {label}")
 
 
 if __name__ == '__main__':
@@ -183,6 +179,6 @@ if __name__ == '__main__':
     dataset = SatelliteDataset(geojson_path, collections, datetime, band, transform=None)
 
     for img, label in dataset:
-        print(f"Origin size: {img.size}, label: {label}")
+        print(f"Origin size: {img.shape}, label: {label}")
     #     plt.imshow(img.permute(1, 2, 0))
     # plt.show()
