@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument("--config", type=str, required=True, help="Path to the yaml configuration file")
     return parser.parse_args()
 
-def main(config: dict):
+def main(config: dict) -> str:
     # Set save dir
     result_dir = config.get("result_dir", None)
     if result_dir is None:
@@ -43,11 +43,11 @@ def main(config: dict):
     # predict
     try:
         result_file = predict(cfg=config, save_dir=result_dir)
-        return True, result_file
+        return result_file
     except Exception:
         error_message = traceback.format_exc()
         logger.error(error_message)
-        return False, ""
+        return ""
 
 
 if __name__ == '__main__':

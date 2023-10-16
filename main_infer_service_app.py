@@ -59,9 +59,9 @@ def get_result(task_id):
     elif results[task_id]["status"] == 1:
         return jsonify({"status": "Job not completed yet"}), 202
     elif results[task_id]["status"] == -1:
-        return jsonify({"status": "Stopped by error", "data": results["result"]})
+        return jsonify({"status": "Inference job failed"}), 500
     else:
-        result_file_path = results[task_id]
+        result_file_path = results[task_id]["result_path"]
         with open(result_file_path, 'r') as f:
             content = f.read()
             logger.info(f"Return data for task {task_id}: {content}")
@@ -78,12 +78,12 @@ def worker():
     while True:
         task_id, config = request_queue.get()
         # The model inference
-        success, result = predic_job(config)
+        result_path = predic_job(config)
         # save result file path into the dict
-        if success:
-            results[task_id] = {"status": 2, "result": result}
+        if os.path.exists(result_path):
+            results[task_id] = {"status": 2, "result_path": result_path}
         else:
-            results[task_id] = {"status": -1, "result": "Stopped by error, please check the log"}
+            results[task_id] = {"status": -1}
 
 if __name__ == '__main__':
     # make sure the result dir exists

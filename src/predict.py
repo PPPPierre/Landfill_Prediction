@@ -33,10 +33,10 @@ def crop_image_with_overlap(
         patch_h = h
         overlap_h = 0
     if w < (1.5 * patch_w):
-        patch_w = h
+        patch_w = w
         overlap_w = 0
 
-    patch_num_h,  patch_num_w = int(h // patch_h / (1 - overlap[0])), int(w // patch_w / (1 - overlap[1]))
+    patch_num_h,  patch_num_w = int(h // patch_h / (1 - overlap_h)), int(w // patch_w / (1 - overlap_w))
 
     if patch_num_h == 1:
         interval_h = 0
@@ -132,11 +132,12 @@ def predict(cfg: dict, save_dir: str):
         band_data = download_aoi_data(area_of_interest, catalog, collections, datetime, band)
         img = np.transpose(band_data, axes=[1, 2, 0])
         img_patches = crop_image_with_overlap(img, patch_size, overlap)
+        logger.info(f"[data: {i}] img shape: {img.shape}, amount of patches: {len(img_patches)}")
         results = predict_slices(img_patches, model, device, transform)
         prob = post_processing(results)
         label = 1 if prob >= threshold else 0
         data.at[i, 'label'] = label
-        logger.info(f"Image: {i}, img shape: {img.shape}, prob: {prob}, label: {label}")
+        logger.info(f"[data: {i}] predict prob: {prob}, result label: {label}")
 
     # Save result
     filename = f"{os.path.basename(geojson_path).replace('.geojson', '')}_result.geojson"
