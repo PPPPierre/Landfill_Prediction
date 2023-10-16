@@ -87,6 +87,7 @@ def predict(cfg: dict, save_dir: str):
 
     # Define device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    logger.info(f"device: {device}")
 
     # Load model
     model_cfg = cfg["model"]
@@ -104,6 +105,9 @@ def predict(cfg: dict, save_dir: str):
         else:
             model.load_state_dict(checkpoint)
 
+    logger.info(f"Model successfully loaded")
+    logger.info(f"{model}")
+
     # Load data
     data_cfg = cfg["data"]
     geojson_path = data_cfg["geojson_path"]
@@ -118,6 +122,8 @@ def predict(cfg: dict, save_dir: str):
         modifier=planetary_computer.sign_inplace,
     )
     data = gpd.read_file(geojson_path)
+
+    logger.info(f"Total amount of data to be predicted: {len(data)}")
 
     model.eval()
     # Start prediction

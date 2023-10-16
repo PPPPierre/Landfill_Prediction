@@ -4,6 +4,7 @@ import argparse
 import yaml
 import datetime
 import warnings
+import traceback
 warnings.filterwarnings("ignore") 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +33,7 @@ def main(config: dict):
 
     # Initialize log
     logger = init_logger("__main__", result_dir, 'pred')
+    logger.info(f"{config}")
     
     # Setup random seed
     seed = config.get('seed', 0)
@@ -39,9 +41,14 @@ def main(config: dict):
     logger.info(f"Random seed: {seed}")
 
     # predict
-    result_file = predict(cfg=config, save_dir=result_dir)
+    try:
+        result_file = predict(cfg=config, save_dir=result_dir)
+        return True, result_file
+    except Exception:
+        error_message = traceback.format_exc()
+        logger.error(error_message)
+        return False, ""
 
-    return result_file
 
 if __name__ == '__main__':
     args = parse_args()
