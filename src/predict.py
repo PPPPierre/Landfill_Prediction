@@ -81,7 +81,7 @@ def post_processing(results):
     return np.max(results)
 
 
-def predict(cfg: dict, save_dir: str):
+def predict(config: dict, save_dir: str):
     # Logger
     logger = logging.getLogger("__main__")
 
@@ -90,7 +90,7 @@ def predict(cfg: dict, save_dir: str):
     logger.info(f"device: {device}")
 
     # Load model
-    model_cfg = cfg["model"]
+    model_cfg = config["model"]
     model = get_model_from_cfg(model_cfg)
     model = model.to(device)
     threshold = model_cfg["threshold"]
@@ -109,7 +109,7 @@ def predict(cfg: dict, save_dir: str):
     logger.info(f"{model}")
 
     # Load data
-    data_cfg = cfg["data"]
+    data_cfg = config["data"]
     geojson_path = data_cfg["geojson_path"]
     transform = get_transforms_from_config(data_cfg["transform"])
     collections = data_cfg["collections"]
@@ -140,7 +140,7 @@ def predict(cfg: dict, save_dir: str):
         logger.info(f"[data: {i}] predict prob: {prob}, result label: {label}")
 
     # Save result
-    filename = f"{os.path.basename(geojson_path).replace('.geojson', '')}_result.geojson"
+    filename = "result.geojson"
     file_path = os.path.join(save_dir, filename)
     data.to_file(file_path, driver='GeoJSON')
     return file_path

@@ -132,19 +132,19 @@ Based on the previous steps of data downloading and modeling, to deploy your mod
 1. prepare train and test dataset in geojson format: `data\raw\train.geojson` `data\raw\test.geojson`
 2. prepare a config file in YAML format, refer to `configs\resnet18_train.yaml`
 3. run the training script, pass the config file path in the project as argument
-
 ```bash
-python ./main_train.py --config ./configs/resnet18_train.yaml
+python ./main.py --config ./configs/resnet18_train.yaml
 ```
+4. check the result directory, the log will be saved in `run.log`, the model weights will be saved in `model` directory.
 
 ### For start a prediction
 1. prepare predict data file in geojson format: `data\raw\pred.geojson`
-2. prepare a config file in YAML format, refer to `configs\resnet18_pred.yaml`
+2. prepare a config file in YAML format, refer to `configs\resnet18_pred.yaml`, change the `model` in `model` to the reletive path of the checkpoint trained.
 3. run the prediction script, pass the config file path in the project as argument
-
 ```bash
-python ./main_pred.py --config ./configs/resnet18_pred.yaml
+python ./main.py --config ./configs/resnet18_pred.yaml
 ```
+4. check the result directory, the results will be saved in `result.geojson`
 
 ### For launch a prediction service
 1. run the script file, start the Flask app

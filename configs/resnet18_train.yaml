@@ -1,4 +1,5 @@
 job_name: resnet18_train
+job_type: train
 verision: 1.0.0
 seed: 18
 

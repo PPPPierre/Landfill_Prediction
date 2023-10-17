@@ -1,9 +1,8 @@
-2023-10-17 01:15:45 [    INFO]: {'job_name': 'resnet18_pred', 'verision': '1.0.0', 'seed': 18, 'model': {'name': 'ResNet18', 'params': {'freeze_backbone': True}, 'threshold': 0.623, 'weight': 'results\\resnet18_train_1.0.0_2023-10-15_20-28-51Z\\epoch_30.pth'}, 'data': {'geojson_path': './data/raw/pred.geojson', 'collections': 'sentinel-2-l2a', 'datetime': '2022-01-01/2022-12-30', 'band': 'visual', 'patch_size': [150, 150], 'overlap': [0.25, 0.25], 'transform': [{'name': 'to_tensor', 'params': {}}, {'name': 'resize', 'params': {'size': [224, 224]}}, {'name': 'normalize', 'params': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}]}}
-2023-10-17 01:15:45 [    INFO]: Received request for getting results for task cc77bb0f-5cea-49c9-89a3-fabceceb9428
-2023-10-17 01:15:45 [    INFO]: Random seed: 18
-2023-10-17 01:15:46 [    INFO]: device: cuda
-2023-10-17 01:15:48 [    INFO]: Model successfully loaded
-2023-10-17 01:15:48 [    INFO]: ResNet18(
+2023-10-17 20:07:02 [    INFO]: {'job_name': 'resnet18_pred', 'job_type': 'prediction', 'verision': '1.0.0', 'seed': 18, 'model': {'name': 'ResNet18', 'params': {'freeze_backbone': True}, 'threshold': 0.623, 'weight': 'results\\resnet18_train_1.0.0_2023-10-17_18-05-33Z\\checkpoints\\epoch_30.pth'}, 'data': {'geojson_path': './data/raw/pred.geojson', 'collections': 'sentinel-2-l2a', 'datetime': '2022-01-01/2022-12-30', 'band': 'visual', 'patch_size': [150, 150], 'overlap': [0.25, 0.25], 'transform': [{'name': 'to_tensor', 'params': {}}, {'name': 'resize', 'params': {'size': [224, 224]}}, {'name': 'normalize', 'params': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}]}}
+2023-10-17 20:07:02 [    INFO]: Random seed: 18
+2023-10-17 20:07:03 [    INFO]: device: cuda
+2023-10-17 20:07:06 [    INFO]: Model successfully loaded
+2023-10-17 20:07:06 [    INFO]: ResNet18(
   (backbone): Sequential(
     (0): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
@@ -89,31 +88,16 @@
   )
   (classifier): Linear(in_features=512, out_features=1, bias=True)
 )
-2023-10-17 01:15:48 [    INFO]: Total amount of data to be predicted: 6
-2023-10-17 01:15:49 [    INFO]: [data: 0] img shape: (229, 275, 3), amount of patches: 1
-2023-10-17 01:15:50 [    INFO]: Received request for getting results for task cc77bb0f-5cea-49c9-89a3-fabceceb9428
-2023-10-17 01:15:51 [    INFO]: [data: 0] predict prob: 0.21542565524578094, result label: 0
-2023-10-17 01:15:51 [    INFO]: [data: 1] img shape: (237, 241, 3), amount of patches: 1
-2023-10-17 01:15:51 [    INFO]: [data: 1] predict prob: 0.296083003282547, result label: 0
-2023-10-17 01:15:51 [    INFO]: [data: 2] img shape: (234, 203, 3), amount of patches: 1
-2023-10-17 01:15:51 [    INFO]: [data: 2] predict prob: 0.00846076663583517, result label: 0
-2023-10-17 01:15:52 [    INFO]: [data: 3] img shape: (228, 175, 3), amount of patches: 1
-2023-10-17 01:15:52 [    INFO]: [data: 3] predict prob: 0.10621162503957748, result label: 0
-2023-10-17 01:15:52 [    INFO]: [data: 4] img shape: (212, 229, 3), amount of patches: 1
-2023-10-17 01:15:52 [    INFO]: [data: 4] predict prob: 0.15173782408237457, result label: 0
-2023-10-17 01:15:53 [    INFO]: [data: 5] img shape: (234, 297, 3), amount of patches: 1
-2023-10-17 01:15:53 [    INFO]: [data: 5] predict prob: 0.10777508467435837, result label: 0
-2023-10-17 01:15:55 [    INFO]: Received request for getting results for task cc77bb0f-5cea-49c9-89a3-fabceceb9428
-2023-10-17 01:15:55 [    INFO]: Return data for task cc77bb0f-5cea-49c9-89a3-fabceceb9428: {
-"type": "FeatureCollection",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-"features": [
-{ "type": "Feature", "properties": { "id": 0, "label": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -73.970947, 40.783058 ], [ -73.981316, 40.768094 ], [ -73.958801, 40.762741 ], [ -73.949097, 40.777624 ], [ -73.970947, 40.783058 ] ] ] } },
-{ "type": "Feature", "properties": { "id": 1, "label": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 139.691706, 35.689487 ], [ 139.700462, 35.673552 ], [ 139.682658, 35.668439 ], [ 139.674198, 35.684322 ], [ 139.691706, 35.689487 ] ] ] } },
-{ "type": "Feature", "properties": { "id": 2, "label": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 151.20929, -33.86882 ], [ 151.215197, -33.883751 ], [ 151.200294, -33.889622 ], [ 151.193665, -33.874687 ], [ 151.20929, -33.86882 ] ] ] } },
-{ "type": "Feature", "properties": { "id": 3, "label": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 37.617634, 55.755826 ], [ 37.626587, 55.740793 ], [ 37.607388, 55.735637 ], [ 37.599449, 55.75065 ], [ 37.617634, 55.755826 ] ] ] } },
-{ "type": "Feature", "properties": { "id": 4, "label": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -3.70379, 40.416775 ], [ -3.71173, 40.401726 ], [ -3.691624, 40.397861 ], [ -3.684952, 40.412883 ], [ -3.70379, 40.416775 ] ] ] } },
-{ "type": "Feature", "properties": { "id": 5, "label": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -46.633309, -23.55052 ], [ -46.641892, -23.565492 ], [ -46.623107, -23.571354 ], [ -46.613058, -23.556358 ], [ -46.633309, -23.55052 ] ] ] } }
-]
-}
-
+2023-10-17 20:07:07 [    INFO]: Total amount of data to be predicted: 6
+2023-10-17 20:07:16 [    INFO]: [data: 0] img shape: (229, 275, 3), amount of patches: 1
+2023-10-17 20:07:17 [    INFO]: [data: 0] predict prob: 0.21542565524578094, result label: 0
+2023-10-17 20:07:18 [    INFO]: [data: 1] img shape: (237, 241, 3), amount of patches: 1
+2023-10-17 20:07:18 [    INFO]: [data: 1] predict prob: 0.296083003282547, result label: 0
+2023-10-17 20:07:19 [    INFO]: [data: 2] img shape: (234, 203, 3), amount of patches: 1
+2023-10-17 20:07:19 [    INFO]: [data: 2] predict prob: 0.00846076663583517, result label: 0
+2023-10-17 20:07:19 [    INFO]: [data: 3] img shape: (228, 175, 3), amount of patches: 1
+2023-10-17 20:07:19 [    INFO]: [data: 3] predict prob: 0.10621162503957748, result label: 0
+2023-10-17 20:07:20 [    INFO]: [data: 4] img shape: (212, 229, 3), amount of patches: 1
+2023-10-17 20:07:20 [    INFO]: [data: 4] predict prob: 0.15173782408237457, result label: 0
+2023-10-17 20:07:21 [    INFO]: [data: 5] img shape: (234, 297, 3), amount of patches: 1
+2023-10-17 20:07:21 [    INFO]: [data: 5] predict prob: 0.10777508467435837, result label: 0

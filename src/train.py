@@ -1,31 +1,47 @@
 import os
+import sys
 import time
 import logging
 
 import torch
 from torch.utils.data import DataLoader
 
-from .utils.checkpoint import save_checkpoint, load_checkpoint
-from .evaluate import evaluate
-from .optim import create_optimizer_with_scheduler_from_cfg
-from .utils.checkpoint import save_checkpoint, load_checkpoint
-from .loss import BCEWithLogitsLoss
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
+from src.dataset import get_dataloader_from_cfg
+from src.model import get_model_from_cfg
+from src.optim import create_optimizer_with_scheduler_from_cfg
+from src.loss import BCEWithLogitsLoss
+from src.evaluate import evaluate
+from src.utils.checkpoint import save_checkpoint, load_checkpoint
+from src.utils.checkpoint import save_checkpoint, load_checkpoint
 
 checkpoint_path = "checkpoint.pth"
 
-def train(
-        config: dict, 
-        train_loader: DataLoader, 
-        test_loader: DataLoader, 
-        model: torch.nn.Module, 
-        device: torch.device,
-        save_dir: str,
-        ):
+def train(config: dict, save_dir: str):
 
-    train_cfg = config['train']
-    test_cfg = config['test']
-
+    # Set logger
     logger = logging.getLogger("__main__")
+    logger.info(f"Config: {config}")
+
+    # Device
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    logger.info(f"Device: {device}")
+
+    # Loading cfgs
+    train_cfg = config["train"]
+    test_cfg = config["test"]
+
+    # Loading data
+    train_set, train_loader = get_dataloader_from_cfg(train_cfg["data"])
+    test_set, test_loader = get_dataloader_from_cfg(test_cfg["data"])
+    logger.info(f"Training data: {len(train_set)}, Testing data: {len(test_set)}")
+
+    # Init model
+    model_cfg = config["model"]
+    model = get_model_from_cfg(model_cfg)
+    model = model.to(device)
     model.train()
     
     # Define criterion
@@ -40,6 +56,7 @@ def train(
     if torch.cuda.is_available() and os.path.exists(resume_ckpt):
         start_epoch = load_checkpoint(model, optimizer, resume_ckpt)
     scheduler.set_last_epoch(start_epoch)
+    logger.info(f"{model}")
     
     # Define training params
     num_epochs = train_cfg['epochs']
@@ -81,8 +98,11 @@ def train(
         logger.info(f"[Epoch {epoch + 1}] train loss: {average_loss:.6f}, AUC: {metrics['AUC']:.3f} with optimal threashold: {metrics['optimal_threshold']:.3f}, accuracy: {metrics['accuracy']:.3f}, precision: {metrics['precision']:.3f}, recall: {metrics['recall']:.3f}, f1_score: {metrics['f1_score']:.3f}")
         
         # Save model
-        save_path = os.path.join(save_dir, f'epoch_{epoch + 1}.pth')
+        checkpoint_dir = os.path.join(save_dir, 'checkpoints')
+        if not os.path.exists(checkpoint_dir):
+            os.makedirs(checkpoint_dir)
+        save_path = os.path.join(checkpoint_dir, f'epoch_{epoch + 1}.pth')
         save_checkpoint(epoch, model, optimizer, save_path)
-
         scheduler.step()
+        
 
