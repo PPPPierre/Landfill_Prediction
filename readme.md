@@ -5,13 +5,20 @@ A machine learning pipeline for detecting the existence of landfills in a given 
 The guidance of the project can be found in **docs\ML_Engineer_CGG_Incubator.pdf**. In this page, I will go through the project and answer questions.
 
 ## Table of Contents
-- [Introduction](#introduction)
-- [Prerequisites](#prerequisites)
-- [Data Collection](#data-collection)
-- [Modeling](#modeling)
-- [ML Pipeline](#ml-pipeline)
-- [Usage](#usage)
-- [Future Work](#future-work)
+
+- [Landfill Detection using Satellite Imagery](#landfill-detection-using-satellite-imagery)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Prerequisites](#prerequisites)
+  - [Data Collection](#data-collection)
+  - [Modeling](#modeling)
+  - [ML Pipeline](#ml-pipeline)
+  - [Usage](#usage)
+    - [For start training script](#for-start-training-script)
+    - [For start a prediction](#for-start-a-prediction)
+    - [For launch a prediction service](#for-launch-a-prediction-service)
+  - [Future Work](#future-work)
+  - [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -19,7 +26,7 @@ This repository contains an end-to-end machine learning pipeline designed to det
 
 ## Prerequisites
 
-- Python 3.10.6 
+- Python 3.10.6
 - torch 2.0.0+cu118
 - torchvision 0.15.1+cu118
 - GPU: Nvidia Geforce GTX 1060
@@ -28,7 +35,7 @@ This repository contains an end-to-end machine learning pipeline designed to det
 
 The data collection is implemented in the `SatelliteDataset` Class in **src\dataset.py**. Based on the parameters of the dataset \(collections, datetime, geojson file, etc. \), the images will be downloaded in real-time during training or testing. The next time, if the dataset detects the downloaded files, it will directly read it to save time.
 
-Answering questions: 
+Answering questions:
 
 1. What are the sizes of these images? Do you need to do some processing for the model building?
 
@@ -40,7 +47,7 @@ Answering questions:
 
     We can find out that all training and test images are nearly of size **150x150**.
 
-2. With the help of [this description](https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a#overview), can you tell the real-world resolution of downloaded images? \(optional\) 
+2. With the help of [this description](https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a#overview), can you tell the real-world resolution of downloaded images? \(optional\)
 
     According to the "GSD" \(Ground Sample Distance\) column of the **Spectral Bands** table on the page, we can see that the real-world resolution of downloaded images, when considering the "visual" asset, is 10 meters. And for other bands, like B05-B07 \(Vegetation red edge\), the "GSD" is 20m. For B01\(Coastal aerosol\) and B09\(Water vapo\), their resolution is 60m.
 
@@ -56,28 +63,28 @@ Based on the requirements of this project, I plan to choose a simple image class
 
 Answering questions:
 
-4. How do you evaluate your model?
+1. How do you evaluate your model?
 
     As the problem is a binary classification, the choice of the threshold will directly influence the result. So, I first chose the **AUC**\(Area Under the Curve\) to evaluate my model. Along with the AUC metric, the best threshold will be calculated by using Youden's J statistic, and then other metrics are applied, such as accuracy, precision, recall, and the F1 score, to evaluate my model. The metrics are implemented in **src\metrics.py**
 
-5. What do you think about the performance that you got with your model? Any reason?
+2. What do you think about the performance that you got with your model? Any reason?
 
     Result on test dataset:
 
-    ```
+    ```plein_text
     AUC: 0.778, accuracy: 0.833, precision: 1.000, recall: 0.667, f1_score: 0.800
     ```
 
     Given the metrics, the model showcases a good AUC of 77.8%, an accuracy rate of 83.3%, a precision of 100%, a recall of 66.7%, and a f1_score of 80%. However, despite these good results, the limited amount of data raises my concerns regarding the reliability of these metrics and the risk of overfitting. It's essential to note that such performance while appearing robust, may not guarantee the model's generalization to unseen data. Gathering more data can help ensure a more dependable performance and reduce the potential for overfitting.
 
-6. Any suggestions to improve the performance?
+3. Any suggestions to improve the performance?
 
     To improve performance, here I suggest considering the following:
 
     - Acquiring More Data: Gathering more data can significantly improve model performance.
     - Data Augmentation: In addition to traditional image data augmentation methods, more targeted data augmentation approaches can be designed based on the characteristics of this dataset: By using the training data's labels, one can randomly select satellite images that contains the training data range and then augment them through random cropping and resizing.
 
-7. What could impact the performance of a machine learning model?
+4. What could impact the performance of a machine learning model?
 
     A machine learning model can be, but is not limited to be, influenced by the following factors:
 
@@ -96,7 +103,7 @@ Based on the previous steps of data downloading and modeling, to deploy your mod
 
 1. Reads the raw data and downloads the satellite images
 
-    In **src\dataset.py**, I extended PyTorch's `Dataset` by implementing the `SatelliteDataset` class, responsible for reading raw data, downloading images and applying data augmentation techniques. During image retrieval, the dataset temporarily stores pictures locally, eliminating the need for re-downloading throughout subsequent training steps. 
+    In **src\dataset.py**, I extended PyTorch's `Dataset` by implementing the `SatelliteDataset` class, responsible for reading raw data, downloading images and applying data augmentation techniques. During image retrieval, the dataset temporarily stores pictures locally, eliminating the need for re-downloading throughout subsequent training steps.
 
 2. Trains the model
 
@@ -124,42 +131,65 @@ Based on the previous steps of data downloading and modeling, to deploy your mod
 
 6. Propose an interface so that this pipeline can be run easily. (optional)
 
-I have implemented a simple web API using **Flask** to use the pipeline, detailed in the `./deployment/app.py` file. It's important to note that the frameworks used in actual production scenarios would be significantly more complex than this one. **This app introduces a basic asynchronous task scheduling mechanism by utilizing a request queue and worker threads to manage incoming requests.** Assuming that the app is running on actual production servers, users can initiate the inference or training pipelines by uploading a specific config file. The app responds by assigning a `task_id` to the user, who can then use `task_id` to access logs, results, and even carry out inferences based on the saved checkpoints. Clearly, this app is currently just a prototype and is capable of extensive enhancements. Additional modules can be integrated to evolve it into a fully-fledged production-grade pipeline application.
+    I have implemented a simple web API using **Flask** to use the pipeline, detailed in the `./deployment/app.py` file. It's important to note that the frameworks used in actual production scenarios would be significantly more complex than this one. **This app introduces a basic asynchronous task scheduling mechanism by utilizing a request queue and worker threads to manage incoming requests.** Assuming that the app is running on actual production servers, users can initiate the inference or training pipelines by uploading a specific config file. The app responds by assigning a `task_id` to the user, who can then use `task_id` to access logs, results, and even carry out inferences based on the saved checkpoints. Clearly, this app is currently just a prototype and is capable of extensive enhancements. Additional modules can be integrated to evolve it into a fully-fledged production-grade pipeline application.
 
 7. Propose a solution for monitoring in production (optional)
 
-Building on the foundation of this app, we can integrate application-level monitoring by employing **Prometheus** to gather operational data and oversee the **Flask** application. We can track various metrics, including **the number of inferences, the time taken for these operations, the frequency of errors, and resource utilization such as CPU and GPU usage**. Subsequently, we can use **Grafana** for the visualization of this monitoring data and combine it with **Alertmanager** for email alert configurations. This comprehensive approach not only enriches our project but also ensures a more efficient and secure pipeline at the production level.
+    Building on the foundation of this app, we can integrate application-level monitoring by employing **Prometheus** to gather operational data and oversee the **Flask** application. We can track various metrics, including **the number of inferences, the time taken for these operations, the frequency of errors, and resource utilization such as CPU and GPU usage**. Subsequently, we can use **Grafana** for the visualization of this monitoring data and combine it with **Alertmanager** for email alert configurations. This comprehensive approach not only enriches our project but also ensures a more efficient and secure pipeline at the production level.
 
 ## Usage
 
 ### For start training script
+
 1. prepare train and test dataset in geojson format: `data\raw\train.geojson` `data\raw\test.geojson`
+
 2. prepare a config file in YAML format, refer to `configs\resnet18_train.yaml`
+
 3. run the training script, pass the config file path in the project as argument
-```bash
-python ./main.py --config ./configs/resnet18_train.yaml
-```
+
+    ```bash
+    python ./main.py --config ./configs/resnet18_train.yaml
+    ```
+
 4. check the result directory, the log will be saved in `run.log`, the model weights will be saved in `model` directory.
 
 ### For start a prediction
+
 1. prepare a predict data file in geojson format as same as the training or test data: `data\raw\pred.geojson`
+
 2. prepare a config file in YAML format, refer to `configs\resnet18_pred.yaml`, change the `model` in `model` to the reletive path of the checkpoint trained.
+
 3. run the prediction script, pass the config file path in the project as argument
-```bash
-python ./main.py --config ./configs/resnet18_pred.yaml
-```
+
+    ```bash
+    python ./main.py --config ./configs/resnet18_pred.yaml
+    ```
+
 4. check the result directory, the results will be saved in `result.geojson`
 
 ### For launch a prediction service
+
 1. run the script file `./deployment/app.py`, start the Flask app
-```bash
-python ./deployment/app.py
-```
+
+    ```bash
+    python ./deployment/app.py
+    ```
+
 2. run the client script `./deployment/client.py` to test the service
-```bash
-python ./deployment/client.py
-```
+
+    ```bash
+    python ./deployment/client.py
+    ```
 
 ## Future Work
 
+Here, it could refer to future integrations, or it could mean what we would still need when facing a real production environment.
 
+- [ ] Add data augmentation: download a bigger image that contains the area of interests then conduct random resize, random crop, etc.
+- [ ] Add **auth**, **SQL**, **frontend**, **Docker** and every thing that make the app a real web app.
+- [ ] Apply **Prometheus**, **Grafana** and **Alertmanager** for monitoring the production.
+- [ ] Apply **Apache Airflow** for automating the ML pipeline as all steps are well modulized in the project.
+
+## Conclusion
+
+This project successfully demonstrates the utilization of machine learning, specifically deep learning convolutional neural networks, to identify landfills in satellite imagery. By establishing a comprehensive, replicable machine learning pipeline, we've navigated the complexities of processing and analyzing high-resolution satellite data, highlighting critical steps and challenges in transitioning to a production environment for real-world applications. Additionally, the project sets up a simple yet representative framework for an ML pipeline, paving the way for further scalability and adaptability in diverse use cases.
