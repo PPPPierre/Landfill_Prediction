@@ -104,5 +104,9 @@ def train(config: dict, save_dir: str):
         save_path = os.path.join(checkpoint_dir, f'epoch_{epoch + 1}.pth')
         save_checkpoint(epoch, model, optimizer, save_path)
         scheduler.step()
-        
+
+    # Save the last epoch
+    save_path = os.path.join(checkpoint_dir, 'last.pth')
+    save_checkpoint(epoch, model, optimizer, save_path)
+    logger.info("$END_OF_LOGS$")
 

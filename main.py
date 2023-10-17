@@ -24,15 +24,15 @@ def parse_args():
 def main(config: dict):
 
     # Set save dir
-    result_dir = config.get("result_dir", None)
-    if result_dir is None:
+    result_dir = config.get('result_dir', None)
+    if not result_dir:
         root_path = SCRIPT_DIR
         time_stamp = datetime.datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%SZ")
-        job_name = config.get("job_name", "job")
+        task_name = config.get("task_name", "task")
         version = config.get("version", "1.0.0")
-        result_dir = os.path.join(root_path, 'results', f"{job_name}_{version}_{time_stamp}")
-        if not os.path.exists(result_dir):
-            os.makedirs(result_dir)
+        result_dir = os.path.join(root_path, 'results', f"{task_name}_{version}_{time_stamp}")
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
 
     logger = init_logger("__main__", result_dir, 'run')
     logger.info(f"{config}")
@@ -43,19 +43,19 @@ def main(config: dict):
     logger.info(f"Random seed: {seed}")
 
     # Enter pipe line
-    job_type = config.get('job_type', None)
+    task_type = config.get('task_type', None)
     try:
-        if job_type == 'train':
+        if task_type == 'train':
             # train
             train(config=config, save_dir=result_dir)
-        elif job_type == 'prediction':
+        elif task_type == 'prediction':
             # prediction
             predict(config=config, save_dir=result_dir)
-        return result_dir
+        return True
     except Exception:
         error_message = traceback.format_exc()
         logger.error(error_message)
-        return ""
+        return False
 
 if __name__ == '__main__':
     args = parse_args()

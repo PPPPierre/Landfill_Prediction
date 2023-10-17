@@ -8,7 +8,7 @@ model:
   params: 
     freeze_backbone: True
   threshold: 0.623
-  weight: results\resnet18_train_1.0.0_2023-10-17_18-05-33Z\checkpoints\epoch_30.pth
+  task_id: a02d1c98-4577-468b-97f2-02d87b195893
 
 data:
   geojson_path: ./data/raw/pred.geojson
