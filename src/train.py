@@ -3,11 +3,7 @@ import time
 import logging
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader
-import mlflow
-import mlflow.pytorch
 
 from .utils.checkpoint import save_checkpoint, load_checkpoint
 from .evaluate import evaluate

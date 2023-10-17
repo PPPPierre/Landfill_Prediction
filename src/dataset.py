@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from src.augmentation import get_transforms_from_config
 
-def get_dataloader_from_cfg(cfg: dict):
+def get_dataloader_from_cfg(cfg: dict) -> [Dataset, DataLoader]:
 
     # Load arguments
     geojson_path = cfg["geojson_path"]
@@ -39,7 +39,6 @@ def get_dataloader_from_cfg(cfg: dict):
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
 
     return dataset, loader
-
 
 class SatelliteDataset(Dataset):
     def __init__(
