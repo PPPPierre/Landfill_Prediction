@@ -124,7 +124,11 @@ Based on the previous steps of data downloading and modeling, to deploy your mod
 
 6. Propose an interface so that this pipeline can be run easily. (optional)
 
+I have implemented a simple web API using **Flask** to use the pipeline, detailed in the `./deployment/app.py` file. It's important to note that the frameworks used in actual production scenarios would be significantly more complex than this one. **This app introduces a basic asynchronous task scheduling mechanism by utilizing a request queue and worker threads to manage incoming requests.** Assuming that the app is running on actual production servers, users can initiate the inference or training pipelines by uploading a specific config file. The app responds by assigning a `task_id` to the user, who can then use `task_id` to access logs, results, and even carry out inferences based on the saved checkpoints. Clearly, this app is currently just a prototype and is capable of extensive enhancements. Additional modules can be integrated to evolve it into a fully-fledged production-grade pipeline application.
+
 7. Propose a solution for monitoring in production (optional)
+
+Building on the foundation of this app, we can integrate application-level monitoring by employing **Prometheus** to gather operational data and oversee the **Flask** application. We can track various metrics, including **the number of inferences, the time taken for these operations, the frequency of errors, and resource utilization such as CPU and GPU usage**. Subsequently, we can use **Grafana** for the visualization of this monitoring data and combine it with **Alertmanager** for email alert configurations. This comprehensive approach not only enriches our project but also ensures a more efficient and secure pipeline at the production level.
 
 ## Usage
 
@@ -138,7 +142,7 @@ python ./main.py --config ./configs/resnet18_train.yaml
 4. check the result directory, the log will be saved in `run.log`, the model weights will be saved in `model` directory.
 
 ### For start a prediction
-1. prepare predict data file in geojson format: `data\raw\pred.geojson`
+1. prepare a predict data file in geojson format as same as the training or test data: `data\raw\pred.geojson`
 2. prepare a config file in YAML format, refer to `configs\resnet18_pred.yaml`, change the `model` in `model` to the reletive path of the checkpoint trained.
 3. run the prediction script, pass the config file path in the project as argument
 ```bash
@@ -147,14 +151,15 @@ python ./main.py --config ./configs/resnet18_pred.yaml
 4. check the result directory, the results will be saved in `result.geojson`
 
 ### For launch a prediction service
-1. run the script file, start the Flask app
+1. run the script file `./deployment/app.py`, start the Flask app
 ```bash
-python ./main_infer_service_app.py 
+python ./deployment/app.py
 ```
-2. run the client script `scripts\inference_client.py` to test the service
+2. run the client script `./deployment/client.py` to test the service
 ```bash
-python ./scripts/inference_client.py
+python ./deployment/client.py
 ```
 
 ## Future Work
+
 
