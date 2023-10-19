@@ -185,7 +185,7 @@ Based on the previous steps of data downloading and modeling, to deploy your mod
 
 Here, it could refer to future integrations, or it could mean what we would still need when facing a real production environment.
 
-- [ ] Add data augmentation: download a bigger image that contains the area of interests then conduct random resize, random crop, etc.
+- [x] Add data augmentation: download a bigger image that contains the area of interests then conduct random resize, random crop, etc.
 - [ ] Add **auth**, **SQL**, **frontend**, **Docker** and every thing that make the app a real web app.
 - [ ] Apply **Prometheus**, **Grafana** and **Alertmanager** for monitoring the production.
 - [ ] Apply **Apache Airflow** for automating the ML pipeline as all steps are well modulized in the project.
