@@ -24,30 +24,26 @@ def crop_image_with_overlap(
         overlap: Tuple[float, float]
         ):
     overlap_h, overlap_w = overlap
-    assert 0 <= overlap_h < 1 and 0 <= overlap_w < 1
+    assert 0 <= overlap_h and 0 <= overlap_w
 
     slices = []
     h, w, _ = image.shape
     patch_h, patch_w = patch_size
-    if h < (1.5 * patch_h):
-        patch_h = h
-        overlap_h = 0
-    if w < (1.5 * patch_w):
-        patch_w = w
-        overlap_w = 0
 
-    patch_num_h,  patch_num_w = int(h // patch_h / (1 - overlap_h)), int(w // patch_w / (1 - overlap_w))
+    patch_num_h,  patch_num_w = int(h  * (1 + overlap_h) // patch_h), int(w * (1 + overlap_w) // patch_w )
 
     if patch_num_h == 1:
+        patch_h = h
         interval_h = 0
     else:
         interval_h = (h - patch_h) // (patch_num_h - 1)
-    
+
     if patch_num_w == 1:
+        patch_w = w
         interval_w = 0
     else:
         interval_w = (w - patch_w) // (patch_num_w - 1)
-
+    
     for i in range(0, patch_num_h):
         for j in range(0, patch_num_w):
             start_h = i * interval_h
@@ -111,6 +107,7 @@ def predict(config: dict, save_dir: str):
     # Load data
     data_cfg = config["data"]
     geojson_path = data_cfg["geojson_path"]
+    scale_factor = data_cfg["scale_factor"]
     transform = get_transforms_from_config(data_cfg["transform"])
     collections = data_cfg["collections"]
     datetime = data_cfg["datetime"]
@@ -129,7 +126,7 @@ def predict(config: dict, save_dir: str):
     # Start prediction
     for i in range(len(data)):
         area_of_interest = data.iloc[i]['geometry']
-        band_data = download_aoi_data(area_of_interest, catalog, collections, datetime, band)
+        band_data = download_aoi_data(area_of_interest, scale_factor, catalog, collections, datetime, band)
         img = np.transpose(band_data, axes=[1, 2, 0])
         img_patches = crop_image_with_overlap(img, patch_size, overlap)
         logger.info(f"[data: {i}] img shape: {img.shape}, amount of patches: {len(img_patches)}")
