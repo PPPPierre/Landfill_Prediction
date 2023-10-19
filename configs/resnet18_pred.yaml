@@ -15,6 +15,7 @@ data:
   collections: sentinel-2-l2a
   datetime: 2022-01-01/2022-12-30
   band: visual
+  scale_factor: 1
   patch_size: [150, 150]
   overlap: [0.25, 0.25]
   transform:

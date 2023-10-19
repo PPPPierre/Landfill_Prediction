@@ -1,6 +1,9 @@
-from typing import Any
+from typing import Any, Tuple
 from .utils.register import Register
+
+import numpy as np
 import torchvision.transforms as transforms
+from torchvision.transforms import functional as F
 
 """
 format of defining transforms in config.yaml file
@@ -66,6 +69,65 @@ class RandomFlip:
             return (self.T2(self.T1(img)), label)
         else:
             return self.T2(self.T1(sample))
+        
+@transforms_registry("random_crop_and_scale")
+class RandomCropAndScale:
+    def __init__(self, crop_size_ratio: Tuple[float, float, float, float]):
+        """
+        Initialize the transformer.
+        Args:
+        - max_crop_percent (dict): A dictionary containing the maximum crop percentage. 
+                                   It has keys 'top', 'bottom', 'left', and 'right'.
+        """
+        self.crop_size_ratio = np.clip(crop_size_ratio, 0, 0.5)
+
+    def __call__(self, sample):
+        """
+        Apply the random crop transformation.
+        
+        Args:
+        - sample (PIL Image or tuple): The input sample containing the image (and optionally the label).
+        
+        Returns:
+        - PIL Image or tuple: The transformed image (and optionally the label).
+        """
+        # Check if the sample is an image-label pair.
+        if (isinstance(sample, tuple) or isinstance(sample, list)) and len(sample) == 2:
+            img, label = sample
+        else:
+            img = sample
+            label = None
+
+        # Get the dimensions of the image.
+        _, img_width, img_height = img.size()
+
+        # Calculate the maximum pixels that can be cropped from each side.
+        top_crop = int(img_height * self.crop_size_ratio[0])
+        bottom_crop = int(img_height * self.crop_size_ratio[1])
+        left_crop = int(img_width * self.crop_size_ratio[2])
+        right_crop = int(img_width * self.crop_size_ratio[3])
+
+        # Randomly choose the number of pixels to crop from each side.
+        top = np.random.randint(0, top_crop + 1)
+        bottom = np.random.randint(0, bottom_crop + 1)
+        left = np.random.randint(0, left_crop + 1)
+        right = np.random.randint(0, right_crop + 1)
+
+        # Calculate the cropping coordinates.
+        top_left_x = left
+        top_left_y = top
+        bottom_right_x = img_width - right
+        bottom_right_y = img_height - bottom
+
+        # Crop the image.
+        img_cropped = F.crop(img, top_left_y, top_left_x, bottom_right_y - top_left_y, bottom_right_x - top_left_x)
+
+        # If there was a label, return the cropped image and the label, otherwise just the image.
+        if label is not None:
+            return img_cropped, label
+        else:
+            return img_cropped
+
 @transforms_registry("normalize")
 class Normalize:
     def __init__(self, mean, std):
@@ -100,6 +162,10 @@ if __name__ == '__main__':
         {
             "name": "random_flip", 
             "params": {"probability_vertical": 0.5, "probability_horizontal": 0.5}
+        },
+        {
+            "name": "random_crop", 
+            "params": {"max_crop_ratio": {"top":0.25, "bottom":0.25, "left":0.25, "right":0.25}}
         },
         {
             "name": "normalize", 

@@ -1,12 +1,14 @@
 # Basic lib
 import os
 import sys
+import math
 from typing import Union, Optional, List, Any
 
 # Lib for data collection
 import geopandas as gpd
 from pystac.extensions.eo import EOExtension as eo
 from pystac_client import Client
+from shapely.geometry import shape, Point, Polygon
 import planetary_computer
 import rasterio
 from rasterio import windows, features, warp
@@ -26,17 +28,30 @@ def get_dataloader_from_cfg(cfg: dict) -> [Dataset, DataLoader]:
 
     # Load arguments
     geojson_path = cfg["geojson_path"]
+    scale_factor = cfg["scale_factor"]
     transform = get_transforms_from_config(cfg["transform"])
     collections = cfg["collections"]
     datetime = cfg["datetime"]
     band = cfg["band"]
-    batch_size = cfg.get("batch_size", 4)
+    batch_size = cfg["batch_size"]
     shuffle = cfg.get("shuffle", True)
     download_dir = cfg.get("download_dir", None)
 
     # Loading dataset and dataloader
-    dataset = SatelliteDataset(geojson_path, collections=collections, datetime=datetime, band=band, download_dir=download_dir, transform=transform)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
+    dataset = SatelliteDataset(
+        geojson_path, 
+        scale_factor=scale_factor, 
+        collections=collections, 
+        datetime=datetime, band=band, 
+        download_dir=download_dir, 
+        transform=transform
+        )
+    loader = DataLoader(
+        dataset, 
+        batch_size=batch_size, 
+        shuffle=shuffle, 
+        collate_fn=collate_fn
+        )
 
     return dataset, loader
 
@@ -44,6 +59,7 @@ class SatelliteDataset(Dataset):
     def __init__(
             self, 
             geojson_path: str, 
+            scale_factor: float, 
             collections: str="sentinel-2-l2a", 
             datetime: str="2022-01-01/2022-12-30", 
             band: str="visual", 
@@ -52,6 +68,7 @@ class SatelliteDataset(Dataset):
             ) -> None:
 
         self.data = gpd.read_file(geojson_path)
+        self.scale_factor = scale_factor
         self.collections = collections
         self.datetime = datetime
         self.band = band
@@ -84,7 +101,7 @@ class SatelliteDataset(Dataset):
         data_path = os.path.join(self.download_dir, f"data_{data_id}.pt")
         
         if not os.path.exists(data_path):
-            band_data = download_aoi_data(area_of_interest, self.catalog, self.collections, self.datetime)
+            band_data = download_aoi_data(area_of_interest, self.scale_factor, self.catalog, self.collections, self.datetime)
             img = np.transpose(band_data, axes=[1, 2, 0])
             
             # Save to the download directory
@@ -107,6 +124,7 @@ def collate_fn(batch):
 
 def download_aoi_data(
         area_of_interest,
+        scale_factor: float=1,
         catalog: Optional[Client]=None, 
         collections: str="sentinel-2-l2a", 
         datetime: str="2022-01-01/2022-12-30", 
@@ -117,6 +135,10 @@ def download_aoi_data(
             "https://planetarycomputer.microsoft.com/api/stac/v1",
             modifier=planetary_computer.sign_inplace,
         )
+
+    if scale_factor < 1:
+        raise ValueError("scale_factor must be greater than 1")
+
     search = catalog.search(
         collections=[collections],
         intersects=area_of_interest,
@@ -130,6 +152,16 @@ def download_aoi_data(
 
     with rasterio.open(asset_href) as ds:
         aoi_bounds = features.bounds(area_of_interest)
+        if scale_factor > 1:
+            minx, miny, maxx, maxy = aoi_bounds
+            centroid = [(maxx+minx)/2, (maxy+miny)/2]
+            new_w, new_h = (maxx - minx) * scale_factor, (maxy - miny) * scale_factor
+            aoi_bounds = (
+                centroid[0] - new_w / 2, 
+                centroid[1] - new_h / 2, 
+                centroid[0] + new_w / 2, 
+                centroid[1] + new_h / 2
+                )
         warped_aoi_bounds = warp.transform_bounds("epsg:4326", ds.crs, *aoi_bounds)
         aoi_window = windows.from_bounds(transform=ds.transform, *warped_aoi_bounds)
         band_data = ds.read(window=aoi_window)
@@ -139,6 +171,7 @@ def download_aoi_data(
 def download_entire_data_set_from_cfg(cfg: dict):
     # Load arguments
     geojson_path = cfg["geojson_path"]
+    scale_factor = cfg.get("scale_factor", 1)
     transform = get_transforms_from_config(cfg["transform"])
     collections = cfg["collections"]
     datetime = cfg["datetime"]
@@ -146,9 +179,21 @@ def download_entire_data_set_from_cfg(cfg: dict):
     download_dir = cfg.get("download_dir", None)
 
     # Loading dataset and dataloader
-    dataset = SatelliteDataset(geojson_path, collections=collections, datetime=datetime, band=band, download_dir=download_dir, transform=transform)
+    dataset = SatelliteDataset(geojson_path, scale_factor=scale_factor, collections=collections, datetime=datetime, band=band, download_dir=download_dir, transform=transform)
     for i, (img, label) in enumerate(dataset):
         print(f"[Data {i}]: size: {img.shape}, label: {label}")
+
+
+def to_square(polygon: Polygon):
+    
+    minx, miny, maxx, maxy = polygon.bounds
+    
+    # get the centroid
+    centroid = [(maxx+minx)/2, (maxy+miny)/2]
+    # get the diagonal
+    diagonal = math.sqrt((maxx-minx)**2+(maxy-miny)**2)
+    
+    return Point(centroid).buffer(diagonal/math.sqrt(2.)/2., cap_style=3)
 
 
 if __name__ == '__main__':
@@ -161,23 +206,32 @@ if __name__ == '__main__':
             "params": {}
         },
         {
+            "name": "random_flip", 
+            "params": {"probability_vertical": 0.5, "probability_horizontal": 0.5}
+        },
+        {
+            "name": "random_crop_and_scale", 
+            "params": {"crop_size_ratio": [0.25, 0.25, 0.25, 0.25]}
+        },
+        {
             "name": "resize", 
             "params": {"size": (224, 224)}
         },
         {
-            "name": "random_flip", 
-            "params": {"probability_vertical": 0.5, "probability_horizontal": 0.5}
+            "name": "normalize", 
+            "params": {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
         },
     ]
 
     collections = "sentinel-2-l2a"
-    geojson_path = "./data/raw/test.geojson"
+    geojson_path = "./data/raw/train.geojson"
     datetime = "2022-01-01/2022-12-30"
     band = "visual"
+    scale_factor = 2
     composed_transforms = get_transforms_from_config(transforms_list)
-    dataset = SatelliteDataset(geojson_path, collections, datetime, band, transform=None)
+    dataset = SatelliteDataset(geojson_path, scale_factor, collections, datetime, band, transform=composed_transforms)
 
     for img, label in dataset:
         print(f"Origin size: {img.shape}, label: {label}")
-    #     plt.imshow(img.permute(1, 2, 0))
-    # plt.show()
+        # plt.imshow(img)
+        # plt.show()

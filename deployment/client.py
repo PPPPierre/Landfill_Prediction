@@ -77,7 +77,6 @@ if __name__ == "__main__":
     config_path = os.path.join(root_path, "configs/resnet18_pred_client.yaml")
     with open(config_path, 'r') as file:
         data = file.read()
-    # data['model']['task_id'] = task_id_train
     task_id_infer = client.send_inference_request(data)
     print(f"Task ID: {task_id_infer}")
     # wait for the inference result

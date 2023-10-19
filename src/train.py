@@ -95,7 +95,7 @@ def train(config: dict, save_dir: str):
         
         # Evaluate
         metrics = evaluate(test_cfg, model, test_loader, criterion, device)
-        logger.info(f"[Epoch {epoch + 1}] train loss: {average_loss:.6f}, AUC: {metrics['AUC']:.3f} with optimal threashold: {metrics['optimal_threshold']:.3f}, accuracy: {metrics['accuracy']:.3f}, precision: {metrics['precision']:.3f}, recall: {metrics['recall']:.3f}, f1_score: {metrics['f1_score']:.3f}")
+        logger.info(f"[Epoch {epoch + 1}] train loss: {average_loss:.6f}, evaluate loss: {metrics['evaluate_loss']:.6f}, AUC: {metrics['AUC']:.3f} with optimal threashold: {metrics['optimal_threshold']:.3f}, accuracy: {metrics['accuracy']:.3f}, precision: {metrics['precision']:.3f}, recall: {metrics['recall']:.3f}, f1_score: {metrics['f1_score']:.3f}")
         
         # Save model
         checkpoint_dir = os.path.join(save_dir, 'checkpoints')
