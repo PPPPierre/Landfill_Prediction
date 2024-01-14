@@ -22,7 +22,6 @@ def parse_args():
     return parser.parse_args()
 
 def main(config: dict):
-
     # Set save dir
     result_dir = config.get('result_dir', None)
     if not result_dir:

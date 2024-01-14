@@ -205,22 +205,22 @@ if __name__ == '__main__':
             "name": "to_tensor", 
             "params": {}
         },
-        {
-            "name": "random_flip", 
-            "params": {"probability_vertical": 0.5, "probability_horizontal": 0.5}
-        },
-        {
-            "name": "random_crop_and_scale", 
-            "params": {"crop_size_ratio": [0.25, 0.25, 0.25, 0.25]}
-        },
+        # {
+        #     "name": "random_flip", 
+        #     "params": {"probability_vertical": 0.5, "probability_horizontal": 0.5}
+        # },
+        # {
+        #     "name": "random_crop_and_scale", 
+        #     "params": {"crop_size_ratio": [0.25, 0.25, 0.25, 0.25]}
+        # },
         {
             "name": "resize", 
             "params": {"size": (224, 224)}
         },
-        {
-            "name": "normalize", 
-            "params": {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
-        },
+        # {
+        #     "name": "normalize", 
+        #     "params": {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
+        # },
     ]
 
     collections = "sentinel-2-l2a"
@@ -231,7 +231,14 @@ if __name__ == '__main__':
     composed_transforms = get_transforms_from_config(transforms_list)
     dataset = SatelliteDataset(geojson_path, scale_factor, collections, datetime, band, transform=composed_transforms)
 
+    fig = plt.figure()
+    plt.axis('off')
+    i = 0
     for img, label in dataset:
         print(f"Origin size: {img.shape}, label: {label}")
-        # plt.imshow(img)
-        # plt.show()
+        plt.subplot(4, 5, i+1)
+        plt.title(label=label)
+        plt.imshow(img.permute(1,2,0))
+        plt.axis('off')
+        i += 1
+    plt.show()

@@ -49,7 +49,7 @@ Answering questions:
 
 2. With the help of [this description](https://planetarycomputer.microsoft.com/dataset/sentinel-2-l2a#overview), can you tell the real-world resolution of downloaded images? \(optional\)
 
-    According to the "GSD" \(Ground Sample Distance\) column of the **Spectral Bands** table on the page, we can see that the real-world resolution of downloaded images, when considering the "visual" asset, is 10 meters. And for other bands, like B05-B07 \(Vegetation red edge\), the "GSD" is 20m. For B01\(Coastal aerosol\) and B09\(Water vapo\), their resolution is 60m.
+    According to the "GSD" \(Ground Sample Distance\) column of the **Item-level Assets** table on the page, we can see that the real-world resolution of downloaded images, when considering the "visual" asset, is 10 meters. And for other bands, like B05-B07 \(Vegetation red edge\), the "GSD" is 20m. For B01\(Coastal aerosol\) and B09\(Water vapo\), their resolution is 60m.
 
 3. Any other insight that you can draw from the data? \(optional\)
 
@@ -186,9 +186,9 @@ Based on the previous steps of data downloading and modeling, to deploy your mod
 Here, it could refer to future integrations, or it could mean what we would still need when facing a real production environment.
 
 - [x] Add data augmentation: download a bigger image that contains the area of interests then conduct random resize, random crop, etc.
-- [ ] Add **auth**, **SQL**, **frontend**, **Docker** and every thing that make the app a real web app.
+- [ ] Add **auth**, **SQL**, **frontend** and every thing that make the app a real web app.
 - [ ] Apply **Prometheus**, **Grafana** and **Alertmanager** for monitoring the production.
-- [ ] Apply **Apache Airflow** for automating the ML pipeline as all steps are well modulized in the project.
+- [ ] Apply **Docker** and **Kubernetes** for automating the deployment and the operation of the pipeline on the server.
 
 ## Conclusion
 
